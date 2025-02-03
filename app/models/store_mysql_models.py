@@ -109,3 +109,17 @@ class User(Base): # for store users
     role = Column(Enum(UserRole), doc="role of the User Shop Keeper, Admin, Consumer")
     store_id = Column(Integer, ForeignKey('store_details.store_id'), doc="Store ID from the store_details table")
     store = relationship('StoreDetails', back_populates='users')
+    
+class InvoiceLookup(Base):
+    __tablename__ = 'invoice_lookup'
+     
+    """
+    SQLAlchemy model for the invoice to imporove sales
+    """
+    
+    invoicelookup_id = Column(Integer, primary_key=True, autoincrement=True)
+    store_id = Column(Integer, doc="store_id")
+    last_invoice_number = Column(String(255), doc="last invloice number")
+    created_at = Column(DateTime, doc="created time")
+    updated_at = Column(DateTime, doc="updated time")
+    active_flag = Column(Integer, doc="active or inactive")
