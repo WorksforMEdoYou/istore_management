@@ -24,3 +24,22 @@ class Manufacturer(ManufacturerBase):
 
     class Config:
         from_attributes = True
+        
+class UpdateManufacturer(ManufacturerBase):
+    """
+    Update the manufacturer 
+    """
+    manufacturer_update_name: str
+    
+    class Config:
+        from_attributes = True
+        
+class ActivateManufacturer(BaseModel):
+    """
+    Activate the manufacturer
+    """
+    manufacturer_name: str
+    active_flag: int
+    
+    class Config:
+        from_attributes = True

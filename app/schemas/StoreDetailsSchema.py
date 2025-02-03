@@ -52,9 +52,28 @@ class StoreSuspendActivate(BaseModel):
     """
     Pydantic model for suspending or activating a store.
     """
-    
+    mobile: str
     remarks: str
     active_flag: int
     
     class Config:
         from_attributes = True
+
+class UpdateStoreMobile(StoreDetailsBase):
+    """
+    Pydantic model for updating a store's mobile number.
+    """
+    update_mobile: str
+    
+    class Config:
+        from_attributes = True
+        
+class StoreVerification(UpdateStoreMobile):
+    """
+    Pydantic model for store verification.
+    """
+    verification: str
+    
+    class Config:
+        from_attributes = True
+         

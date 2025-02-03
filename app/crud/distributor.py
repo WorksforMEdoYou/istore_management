@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from ..models.store_mysql_models import Distributor as DistributorModel
-from ..schemas.DistributorSchema import Distributor as DistributorSchema, DistributorCreate
+from ..schemas.DistributorSchema import Distributor as DistributorSchema, DistributorCreate, UpdateDistributorRecord
 import logging
 from typing import List
 from datetime import datetime
@@ -60,10 +60,9 @@ def get_distibutor_record_db(distributor_name: str, db: Session):
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
     
-def update_distributor_record_db(distributor_name: str, distributor: DistributorCreate, db: Session):
-    
+def update_distributor_record_db(distributor_name: str, distributor: UpdateDistributorRecord, db: Session):
     """
-    Update distributor record by distributor_id
+    Update distributor record by distributor_name
     """
     try:
         db_distributor = db.query(DistributorModel).filter(DistributorModel.distributor_name == distributor_name).first()

@@ -24,3 +24,22 @@ class Distributor(DistributorBase):
 
     class Config:
         from_attributes = True
+        
+class UpdateDistributorRecord(DistributorBase):
+    """
+    Pydantic model for updating an existing distributor record.
+    """
+    update_distributor_name: str
+    
+    class Config:
+        from_attributes = True
+        
+class DistributorActivate(BaseModel):
+    """
+    Pydantic model for activating a distributor record.
+    """
+    distributor_name: str
+    active_flag: int
+    
+    class Config:
+        from_attributes = True

@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from istore.app.models.store_mysql_models import StoreDetails as StoreDetailsModel
-from istore.app.schemas.StoreDetailsSchema import StoreDetailsCreate, StoreDetails
+from istore.app.schemas.StoreDetailsSchema import StoreDetailsCreate, StoreDetails, UpdateStoreMobile
 import logging
 from typing import List
 from datetime import datetime
@@ -107,16 +107,34 @@ def verify_stores(mobile: str, verification: str, db: Session = Depends(get_db))
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
 
-def update_store_record(mobile: str, store: StoreDetailsCreate, db: Session = Depends(get_db)):
+def map_store_details_to_update_store_mobile(store: StoreDetailsModel, update_mobile: str) -> UpdateStoreMobile:
+    return UpdateStoreMobile(
+        store_name=store.store_name,
+        license_number=store.license_number,
+        gst_state_code=store.gst_state_code,
+        gst_number=store.gst_number,
+        pan=store.pan,
+        address=store.address,
+        email=store.email,
+        mobile=store.mobile,
+        owner_name=store.owner_name,
+        is_main_store=store.is_main_store,
+        latitude=store.latitude,
+        longitude=store.longitude,
+        status=store.status,
+        update_mobile=update_mobile
+    )
+
+def update_store_record(store: UpdateStoreMobile, db: Session):
     """
     Update store record by mobile
     """
     try:
-        store_valid = store_validation_mobile(mobile, db)
+        store_valid = store_validation_mobile(store.update_mobile, db)
         if store_valid == "unique":
             raise HTTPException(status_code=400, detail="Store not found")
-        db_store = update_store_record_db(mobile, store, db)
-        return db_store
+        db_store = update_store_record_db(store, db)
+        return map_store_details_to_update_store_mobile(db_store, store.update_mobile)
     except SQLAlchemyError as e:
         db.rollback()
         logger.error(f"Database error: {str(e)}")

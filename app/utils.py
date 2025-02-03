@@ -6,6 +6,7 @@ import logging
 from .db.mysql_session import get_db
 from .models.store_mysql_models import StoreDetails as StoreDetailsModel
 from .schemas.StoreDetailsSchema import StoreDetailsCreate
+from bson import ObjectId
 
 # configuring the logger
 logger = logging.getLogger(__name__)
@@ -59,4 +60,50 @@ def store_validation_mobile(mobile:str, db: Session = get_db):
     except SQLAlchemyError as e:
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
+
+#check id validation
+def validate_by_id(id:int, model, field:str, db:Session):
+    """
+    validation by the id to compare the mysql with mongodb
+    """
+    try:
+        result = db.query(model).filter(getattr(model, field) == id).first()
+        if result:
+            return result
+        else:
+            return "unique"
+    except SQLAlchemyError as e:
+        logger.error(f"Database error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+
+def get_name_by_id(id:int, model, field:str, name_field:str, db:Session):
+    """
+    Get the name by the id
+    """
+    try:
+        result = db.query(model).filter(getattr(model, field) == id).first()
+        if result:
+            return getattr(result, name_field)
+        else:
+            return "unique"
+    except SQLAlchemyError as e:
+        logger.error(f"Database error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+
+def check_id_available_mongodb(id:str, model:str, db):
+    """
+    checking the recored available in mongodb
+    """
+    try:
+        result = db[model].find_one({"_id": ObjectId(str(id))})
+        if result:
+            return result
+        else:
+            return "unique"
+    except Exception as e:
+        logger.error(f"Database error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error: " + str(e))
     
+def discount(mrp, discount):
+    price = mrp - (mrp * discount / 100)
+    return price

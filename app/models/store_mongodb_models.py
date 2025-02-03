@@ -2,7 +2,7 @@ from bson import ObjectId
 from pydantic import BaseModel, Field, constr
 from typing import List, Text
 from datetime import datetime
-from ...app.models.store_mongodb_eunums import OrderStatus, PaymentMethod, MedicineForms, UnitsInPack, Package
+from ..models.store_mongodb_eunums import OrderStatus, PaymentMethod, MedicineForms, UnitsInPack, PackageType
 
 class PyObjectId(ObjectId):
     @classmethod
@@ -45,7 +45,7 @@ class Order(BaseModel):
 
 class SaleItem(BaseModel):
     medicine_id: int = Field(..., description="Medicine ID from the MYSQL medicine_master table")
-    batch_id: str = Field(..., description="Batch ObjectID from the stock ObjectID") # this id should contain the stock id
+    batch_id: str = Field(..., description="Batch id from stock") 
     expiry_date: datetime = Field(..., description="Expiry date of a medicine")
     quantity: int = Field(..., description="Quantity of the medicine")
     price: float = Field(..., description="Price of the medicine")
@@ -62,7 +62,7 @@ class Sale(BaseModel):
     sale_date: datetime = Field(..., description="Sale Date")
     customer_id: str = Field(..., description="Customer OBjectId from the customer collection") 
     total_amount: float = Field(..., description="Total amount of the saled medicine")
-    invoice_id: int = Field(..., description="invoice ID of the bill")
+    invoice_id: str = Field(..., description="invoice ID of the bill")
     sale_items: List[SaleItem] = Field(..., description="List of Saled medicines")
     class Config:
         arbitrary_types_allowed = True
@@ -91,17 +91,24 @@ class Stock(BaseModel):
 
 class PurchaseItem(BaseModel):
     medicine_id: int = Field(..., description="Medicine ID from the MYSQL medicine_master table")
-    batch_id: str = Field(..., description="Batch ObjectID from the Sales collection")  #from batch details
-    expiry_date: str = Field(..., description="Expiry date of the purchased medicine")
-    quantity: int = Field(..., description="Quantity of the Purchased Medicine")
-    price: float = Field(..., description="Price of the Purchased medicine ")
+    batch_number: str = Field(..., description="Batch if from the purchased person")  
+    expiry_date: datetime = Field(..., description="Expiry date of the purchased medicine")
+    #quantity: int = Field(..., description="Quantity of the Purchased Medicine")
     manufacture_id: int = Field(..., description="Manufacturer ID from the MYSQL manufaccturer table")
     medicine_form: MedicineForms = Field(..., description="Medicine Form can be liquid, tablet, injection, capsule, powder")
-    units_in_pack: UnitsInPack = Field(..., description="Units In Pack can be Ml Count MGMS")
-    unit_quantity: int = Field(..., description="Unit Quantity") # n
-    package: Package = Field(..., description="Package can be strip, bottle, vial, amp, sachet") # strip/bottle/vial/amp/sachet
-    package_count: int = Field(..., description="Package count") # p
-    medicine_quantity: int = Field(..., description="Medicine can be a multiple of unit_quantity * package_count") #n*p
+    
+    #units_in_pack: UnitsInPack = Field(..., description="Units In Pack can be Ml Count MGMS")
+    #unit_quantity: int = Field(..., description="Unit Quantity") # n
+    package_type: PackageType = Field(..., description="Package type can be strip, bottle, vial, amp, sachet") # strip/bottle/vial/amp/sachet
+    units_per_package_type:int = Field(..., description="packackage type no of medicines")
+    packagetype_quantity: int = Field(..., description="packackage medicnes available in the unit per package type")
+    purchase_quantity: int = Field(..., description="total quantity in medicine")
+    #package_count: int = Field(..., description="Package count") # p
+    #medicine_quantity: int = Field(..., description="Medicine can be a multiple of unit_quantity * package_count") #n*p
+    
+    purchase_mrp: float = Field(..., description="mrp of the purchased medicine")
+    purchase_discount: float = Field(..., description="discount per medicine")
+    purchase_amount: float = Field(..., description="purchased amount")
     class Config:
         arbitrary_types_allowed = True
 
@@ -114,8 +121,10 @@ class Purchase(BaseModel):
     store_id: int = Field(..., description="Store ID from the MYSQL store_details table")
     purchase_date: datetime = Field(..., description="Purchase Date of the medicines")
     distributor_id: int = Field(..., description="Distributor ID from the MYSQL distributor table")
-    total_amount: float = Field(..., description="Total Amount of the purchased medicines")
-    invoice_number : int = Field(..., description="Invoice Number of the purchase bill")
+    purchased_amount: float = Field(..., description="Total Amount of the purchased medicines")
+    invoice_number : str = Field(..., description="Invoice Number of the purchase bill")
+    discount:float = Field(..., description="discount of the purchasesd medicine")
+    mrp: float = Field(..., description="mrp of the purchaed mediciene")
     purchase_items: List[PurchaseItem] = Field(..., description="Purchase items list")
     class Config:
         arbitrary_types_allowed = True
@@ -128,13 +137,13 @@ class Pricing(BaseModel):
     
     store_id: int = Field(..., description="Store ID from the MYSQL store_details table")
     medicine_id: int = Field(..., description="medicine ID from the MYSQL medicine_mastrer table")
-    price: float = Field(..., description="Price of the Medicine")
+    #price: float = Field(..., description="Price of the Medicine") #the pricice can be differ by mrp and discount
     mrp: float = Field(..., description="MRP of the medicine")
     discount: float = Field(..., description="Discount of the Medicine")
     net_rate: float = Field(..., description="NET Rate of the medicine")
     is_active: bool = Field(..., description="Is Active True or False")
     last_updated_by: str = Field(..., description="Last Updated can be a user_name or user_id from the MYSQL user table") # user id or name of the person who last updated
-    updated_on: datetime = Field(..., description="updated on")
+    
     class Config:
         arbitrary_types_allowed = True
 
@@ -152,11 +161,11 @@ class Customer(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-class MedicineAvailability(BaseModel):
+""" class MedicineAvailability(BaseModel):
     
-    """
+    
     Base model for the Medicine Availability collection.
-    """
+    
     
     store_id: int = Field(..., description="Store ID from the MYSQL store_details table")
     medicine_id: int = Field(..., description="Medicine ID from the MYSQL medicine_master table")
@@ -164,5 +173,5 @@ class MedicineAvailability(BaseModel):
     last_updated: datetime = Field(..., description="Last Updated")
     updated_by: constr(max_length=255) = Field(..., description="Updated by Either can be a User_id or user_name from the MYSQL user table")
     class Config:
-        arbitrary_types_allowed = True
+        arbitrary_types_allowed = True """
     

@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..db.mysql import get_db
 from ..models.store_mysql_models import Manufacturer as ManufacturerModel
-from ..schemas.ManufacturerSchema import Manufacturer as ManufacturerSchema, ManufacturerCreate
+from ..schemas.ManufacturerSchema import Manufacturer as ManufacturerSchema, ManufacturerCreate, UpdateManufacturer
 import logging
 from typing import List
 from datetime import datetime
@@ -61,7 +61,7 @@ def get_manufacturer_record_db(manufacturer_name: str, db: Session):
         logger.error(f"Error getting manufacturer record: {e}")
         raise HTTPException(status_code=500, detail="Error getting manufacturer record: " + str(e))
 
-def update_manufacturer_record_db(manufacturer_name: str, manufacturer: ManufacturerCreate, db: Session):
+def update_manufacturer_record_db(manufacturer_name: str, manufacturer: UpdateManufacturer, db: Session):
     """
     Update manufacturer record by manufacturer_name
     """
@@ -75,10 +75,10 @@ def update_manufacturer_record_db(manufacturer_name: str, manufacturer: Manufact
         db.refresh(db_manufacturer)
         return db_manufacturer
     except Exception as e:
-        logger.error(f"Error updating manufacturer record: {e}")
         db.rollback()
-        raise HTTPException(status_code=500, detail="Error updating manufacturer record: " + str(e))
-
+        logger.error(f"Database error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+    
 def activate_manufacturer_record_db(manufacturer_name, active_flag, db:Session):
     """
     Updating the Manufacturers active flag 0 or 1

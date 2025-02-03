@@ -32,7 +32,7 @@ class UnitsInPack(str, Enum):
     COUNT = "count"
     MGMS = "mgms"
     
-class Package(str, Enum):
+class PackageType(str, Enum):
     def __str__(self):
         return str(self.value)
     STRIP = "strip"

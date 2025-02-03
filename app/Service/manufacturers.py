@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..db.mysql import get_db
 from ..models.store_mysql_models import Manufacturer as ManufacturerModel
-from ..schemas.ManufacturerSchema import Manufacturer as ManufacturerSchema, ManufacturerCreate
+from ..schemas.ManufacturerSchema import Manufacturer as ManufacturerSchema, ManufacturerCreate, UpdateManufacturer
 import logging
 from typing import List
 from datetime import datetime
@@ -61,6 +61,12 @@ def get_manufacturer_record(manufacturer_name: str, db: Session):
         logger.error(f"Error getting manufacturer record: {e}")
         raise HTTPException(status_code=500, detail="Error getting manufacturer record: " + str(e))
 
+def map_manufacturer_to_update_manufacturer_record(manufacturer: ManufacturerModel, update_manufacturer_name: str) -> UpdateManufacturer:
+    return UpdateManufacturer(
+        manufacturer_name=manufacturer.manufacturer_name,
+        manufacturer_update_name=update_manufacturer_name  # Use the provided update_manufacturer_name
+    )
+
 def update_manufacturer_record(manufacturer_name: str, manufacturer: ManufacturerCreate, db: Session):
     """
     Update manufacturer record by manufacturer_name
@@ -71,7 +77,7 @@ def update_manufacturer_record(manufacturer_name: str, manufacturer: Manufacture
             raise HTTPException(status_code=400, detail="Manufacturer not found")
         
         db_manufacturer = update_manufacturer_record_db(manufacturer_name, manufacturer, db)
-        return db_manufacturer
+        return map_manufacturer_to_update_manufacturer_record(db_manufacturer, manufacturer_name)
     except Exception as e:
         logger.error(f"Error updating manufacturer record: {e}")
         db.rollback()

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from ..db.mysql_session import get_db
 from ..models.store_mysql_models import Distributor as DistributorModel
-from ..schemas.DistributorSchema import Distributor as DistributorSchema, DistributorCreate
+from ..schemas.DistributorSchema import Distributor as DistributorSchema, DistributorCreate, UpdateDistributorRecord, DistributorActivate
 import logging
 from typing import List
 from ..Service.distributor import creating_distributor_record, get_all_distributors, get_distibutor_record, update_distributor_record, activate_distributor_record
@@ -41,20 +41,20 @@ def get_distributor(distributor_name: str, db: Session = Depends(get_db)):
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
 
-@router.put("/distributors/{distributor_name}", response_model=DistributorSchema, status_code=status.HTTP_200_OK)
-def update_distributor(distributor_name: str, distributor: DistributorCreate, db: Session = Depends(get_db)):
+@router.put("/distributors/", response_model=UpdateDistributorRecord, status_code=status.HTTP_200_OK)
+def update_distributor(distributor: UpdateDistributorRecord, db: Session = Depends(get_db)):
     try:
-        db_distributor = update_distributor_record(distributor_name=distributor_name, distributor=distributor, db=db)
+        db_distributor = update_distributor_record(distributor_name=distributor.update_distributor_name, distributor=distributor, db=db)
         return db_distributor
     except SQLAlchemyError as e:
         db.rollback()
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
 
-@router.put("/distibutors/active/{distributor_name}", status_code=status.HTTP_200_OK)
-def update_distributor_active_status(distributor_name: str, active_flag: int, db: Session = Depends(get_db)):
+@router.put("/distibutors/active/", status_code=status.HTTP_200_OK)
+def update_distributor_active_status(distributor:DistributorActivate, db: Session = Depends(get_db)):
     try:
-        db_distributor = activate_distributor_record(distributor_name=distributor_name, active_flag=active_flag, db=db)
+        db_distributor = activate_distributor_record(distributor_name=distributor.distributor_name, active_flag=distributor.active_flag, db=db)
         return db_distributor
     except Exception as e:
         db.rollback()

@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from ..models.store_mysql_models import StoreDetails as StoreDetailsModel
-from ..schemas.StoreDetailsSchema import StoreDetailsCreate, StoreDetails
+from ..schemas.StoreDetailsSchema import StoreDetailsCreate, StoreDetails, UpdateStoreMobile
 import logging
 from typing import List
 from datetime import datetime
@@ -110,12 +110,12 @@ def verify_stores_db(mobile: str, verification: str, db: Session = Depends(get_d
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
 
-def update_store_record_db(mobile: str, store: StoreDetailsCreate, db: Session = Depends(get_db)):
+def update_store_record_db(store: UpdateStoreMobile, db: Session):
     """
     Update store record by mobile
     """
-    try:        
-        db_store = db.query(StoreDetailsModel).filter(StoreDetailsModel.mobile == mobile).first()
+    try:
+        db_store = db.query(StoreDetailsModel).filter(StoreDetailsModel.mobile == store.update_mobile).first()
         if db_store:
             db_store.store_name = store.store_name
             db_store.license_number = store.license_number

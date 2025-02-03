@@ -14,6 +14,7 @@ class MedicineMasterBase(BaseModel):
     unit_of_measure: constr(max_length=10)
     manufacturer_id: int
     category_id: int
+    composition: constr(max_length=255)
 
 class MedicineMasterCreate(MedicineMasterBase):
     
@@ -31,3 +32,24 @@ class MedicineMaster(MedicineMasterBase):
 
     class Config:
         from_attributes = True
+        
+class ActivateMedicine(BaseModel):
+    
+    """
+    Activating the medicine
+    """
+    medicine_name: str
+    active_flag: int
+    
+    class Config:
+        from_attributes = True
+        
+class UpdateMedicine(MedicineMasterBase):
+    """
+    Updating the medicine
+    """
+    medicine_update_name: str
+    
+    class Config:
+        from_attributes = True
+    

@@ -79,9 +79,10 @@ class MedicineMaster(Base):
     created_at = Column(DateTime, doc="medicine created at")
     updated_at = Column(DateTime, doc="medicine updated at")
     active_flag = Column(Integer, doc="0 or 1")
+    composition = Column(String(255), doc="Composition of the medicine")
     manufacturer = relationship("Manufacturer", back_populates="medicines")
     category = relationship("Category", back_populates="medicines")
-
+    
 class Distributor(Base):
     __tablename__ = 'distributor'
     

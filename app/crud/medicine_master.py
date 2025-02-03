@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from ..db.mysql_session import get_db
 from ..models.store_mysql_models import MedicineMaster as MedicineMasterModel 
-from ..schemas.MedicinemasterSchema import MedicineMaster as MedicineMasterSchema, MedicineMasterCreate
+from ..schemas.MedicinemasterSchema import MedicineMaster as MedicineMasterSchema, MedicineMasterCreate, UpdateMedicine
 import logging
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
@@ -43,6 +43,7 @@ def get_medicine_list_db(db:Session):
                 "unit_of_measure": medicine.unit_of_measure,
                 "manufacturer_id": medicine.manufacturer_id,
                 "category_id": medicine.category_id,
+                "composition": medicine.composition,
                 "created_at": medicine.created_at,
                 "updated_at": medicine.updated_at,
                 "active_flag": medicine.active_flag 
@@ -68,8 +69,7 @@ def get_medicine_master_record_db(medicine_name: str, db: Session):
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
 
-def update_medicine_master_record_db(medicine_name: str, medicine_master: MedicineMasterCreate, db: Session):
-    
+def update_medicine_master_record_db(medicine_name: str, medicine_master: UpdateMedicine, db: Session):
     """
     Update medicine_master record by medicine_id
     """
@@ -78,15 +78,16 @@ def update_medicine_master_record_db(medicine_name: str, medicine_master: Medici
         if not db_medicine_master:
             raise HTTPException(status_code=404, detail="Medicine not found")
         
-        db_medicine_master.medicine_name = medicine_master.medicine_name,
-        db_medicine_master.generic_name = medicine_master.generic_name,
-        db_medicine_master.hsn_code = medicine_master.hsn_code,
-        db_medicine_master.formulation = medicine_master.formulation,
-        db_medicine_master.strength = medicine_master.strength,
-        db_medicine_master.unit_of_measure = medicine_master.unit_of_measure,
-        db_medicine_master.manufacturer_id = medicine_master.manufacturer_id,
-        db_medicine_master.category_id = medicine_master.category_id,
-        db_medicine_master.updated_at = datetime.now(),
+        db_medicine_master.medicine_name = medicine_master.medicine_name
+        db_medicine_master.generic_name = medicine_master.generic_name
+        db_medicine_master.hsn_code = medicine_master.hsn_code
+        db_medicine_master.formulation = medicine_master.formulation
+        db_medicine_master.strength = medicine_master.strength
+        db_medicine_master.unit_of_measure = medicine_master.unit_of_measure
+        db_medicine_master.manufacturer_id = medicine_master.manufacturer_id
+        db_medicine_master.category_id = medicine_master.category_id
+        db_medicine_master.composition = medicine_master.composition
+        db_medicine_master.updated_at = datetime.now()
         
         db.commit()
         db.refresh(db_medicine_master)
@@ -95,7 +96,7 @@ def update_medicine_master_record_db(medicine_name: str, medicine_master: Medici
         db.rollback()
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
-
+    
 def activate_medicine_record_db(medicine_name, active_flag, db:Session):
     """
     Updating the distributor active flag 0 or 1

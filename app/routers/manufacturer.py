@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..db.mysql import get_db
 from ..models.store_mysql_models import Manufacturer as ManufacturerModel
-from ..schemas.ManufacturerSchema import Manufacturer as ManufacturerSchema, ManufacturerCreate
+from ..schemas.ManufacturerSchema import Manufacturer as ManufacturerSchema, ManufacturerCreate, UpdateManufacturer, ActivateManufacturer
 import logging
 from typing import List
 from ..Service.manufacturers import create_manufacturer_record, get_manufacturer_record, update_manufacturer_record, get_manufacturer_list, activate_manufacturer_record
@@ -40,20 +40,20 @@ def get_manufacturer(manufacturer_name: str, db: Session = Depends(get_db)):
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
 
-@router.put("/manufacturers/{manufacturer_name}", response_model=ManufacturerSchema, status_code=status.HTTP_200_OK)
-def update_manufacturer(manufacturer_name: str, manufacturer: ManufacturerCreate, db: Session = Depends(get_db)):
+@router.put("/manufacturers/", response_model=UpdateManufacturer, status_code=status.HTTP_200_OK)
+def update_manufacturer(manufacturer: UpdateManufacturer, db: Session = Depends(get_db)):
     try:
-        db_manufacturer = update_manufacturer_record(manufacturer_name=manufacturer_name, manufacturer=manufacturer, db=db)
+        db_manufacturer = update_manufacturer_record(manufacturer_name=manufacturer.manufacturer_update_name, manufacturer=manufacturer, db=db)
         return db_manufacturer
     except Exception as e:
         db.rollback()
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
-
-@router.put("/manufacturers/activate/{manufacturer_name}", status_code=status.HTTP_200_OK)
-def activate_deactivate(manufacturer_name:str, active_flag:int, db:Session = Depends(get_db)):
+    
+@router.put("/manufacturers/activate/", status_code=status.HTTP_200_OK)
+def activate_deactivate(manufacturer: ActivateManufacturer, db:Session = Depends(get_db)):
     try:
-        db_manufacturer = activate_manufacturer_record(manufacturer_name=manufacturer_name, active_flag=active_flag, db=db)
+        db_manufacturer = activate_manufacturer_record(manufacturer_name=manufacturer.manufacturer_name, active_flag=manufacturer.active_flag, db=db)
         return db_manufacturer
     except Exception as e:
         db.rollback()

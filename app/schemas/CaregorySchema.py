@@ -2,7 +2,7 @@ from pydantic import BaseModel, constr
 from typing import Optional
 
 class CategoryBase(BaseModel):
-    
+
     """
     Base model for Category containing common fields.
     """

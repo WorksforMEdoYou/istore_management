@@ -5,7 +5,7 @@ from ..db.mysql_session import get_db
 from ..models.store_mysql_models import MedicineMaster as MedicineMasterModel 
 from ..models.store_mysql_models import Category 
 from ..models.store_mysql_models import Manufacturer
-from ..schemas.MedicinemasterSchema import MedicineMaster as MedicineMasterSchema, MedicineMasterCreate
+from ..schemas.MedicinemasterSchema import MedicineMaster as MedicineMasterSchema, MedicineMasterCreate, UpdateMedicine
 import logging
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
@@ -45,7 +45,8 @@ def create_medicine_master_record(medicine_master: MedicineMasterCreate, db: Ses
             category_id = medicine_master.category_id,
             created_at = datetime.now(),
             updated_at = datetime.now(),
-            active_flag = 1
+            active_flag = 1,
+            composition = medicine_master.composition
         )
         result = create_medicine_master_record_db(db_medicine_master, db)
         return result
@@ -80,15 +81,28 @@ def get_medicine_master_record(medicine_name: str, db: Session):
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
 
-def update_medicine_master_record(medicine_name: str, medicine_master: MedicineMasterCreate, db: Session):
-    
+def map_medicine_master_to_update_medicine(medicine_master: MedicineMasterModel, update_medicine_name: str) -> UpdateMedicine:
+    return UpdateMedicine(
+        medicine_name=medicine_master.medicine_name,
+        generic_name=medicine_master.generic_name,
+        hsn_code=medicine_master.hsn_code,
+        formulation=medicine_master.formulation,
+        strength=medicine_master.strength,
+        unit_of_measure=medicine_master.unit_of_measure,
+        manufacturer_id=medicine_master.manufacturer_id,
+        category_id=medicine_master.category_id,
+        composition=medicine_master.composition,
+        medicine_update_name=update_medicine_name  # Use the provided update_medicine_name
+    )
+
+def update_medicine_master_record(medicine_name: str, medicine_master: UpdateMedicine, db: Session):
     """
     Update medicine_master record by medicine_id
     """
     try:
         # Validate by medicine_name
         validate_medicine_name_available = check_name_available(name=medicine_name, model=MedicineMasterModel, field="medicine_name", db=db)
-        if validate_medicine_name_available=="unique":
+        if validate_medicine_name_available == "unique":
             raise HTTPException(status_code=400, detail="Medicine not found")
         
         # Validate category_id
@@ -100,7 +114,7 @@ def update_medicine_master_record(medicine_name: str, medicine_master: MedicineM
             raise HTTPException(status_code=400, detail="Invalid manufacturer_id")
         
         db_medicine_master = update_medicine_master_record_db(medicine_name, medicine_master, db)
-        return db_medicine_master
+        return map_medicine_master_to_update_medicine(db_medicine_master, medicine_master.medicine_update_name)
     except Exception as e:
         db.rollback()
         logger.error(f"Database error: {str(e)}")
