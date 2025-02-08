@@ -8,11 +8,7 @@ class UpdatePricing(Pricing):
     """
     Model for delete purchase request
     """
-    update_store_id: int = Field(..., description="updating purpose")
-    update_medicine_id: int = Field(..., description="updating user id")
-    
-    class Config:
-        from_attributes = True    
+    pass   
         
 class DeletePricing(BaseModel):
     """
@@ -21,6 +17,14 @@ class DeletePricing(BaseModel):
     store_id: int = Field(..., description="store id for delete")
     medicine_id: int = Field(..., description="medicine id for the delete")
     
+    class Config:
+        from_attributes = True
+
+class PricingMessage(BaseModel):
+    """
+    Message for the pricing
+    """
+    message: str = Field(..., description="message for the pricing")
     class Config:
         from_attributes = True
         

@@ -11,7 +11,7 @@ class ManufacturerBase(BaseModel):
 class ManufacturerCreate(ManufacturerBase):
     
     """
-    Pydantic model for creating a new manufacturer record.
+    Pydantic model for creating a new manufacturer .
     """
     pass
 
@@ -29,7 +29,7 @@ class UpdateManufacturer(ManufacturerBase):
     """
     Update the manufacturer 
     """
-    manufacturer_update_name: str
+    manufacturer_update_name: constr(max_length=255)
     
     class Config:
         from_attributes = True
@@ -38,8 +38,14 @@ class ActivateManufacturer(BaseModel):
     """
     Activate the manufacturer
     """
-    manufacturer_name: str
+    manufacturer_name: constr(max_length=255)
     active_flag: int
     
     class Config:
         from_attributes = True
+        
+class ManufacturerMessage(BaseModel):
+    """
+    Message for Manufacturer
+    """
+    message: str

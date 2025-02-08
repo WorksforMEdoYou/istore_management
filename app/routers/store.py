@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from ..db.mysql_session import get_db
 from ..models.store_mysql_models import StoreDetails as StoreDetailsModel
-from ..schemas.StoreDetailsSchema import StoreDetailsCreate, StoreDetails, StoreSuspendActivate, UpdateStoreMobile, StoreVerification
+from ..schemas.StoreDetailsSchema import StoreDetailsCreate, StoreDetails, StoreSuspendActivate, UpdateStoreMobile, StoreVerification, StoreMessage
 import logging
 from typing import List
-from ..Service.store import create_store_record, get_list_stores, get_store_record, update_store_record, suspend_activate_store, verify_stores
+from ..Service.store import create_store_bl, get_stores_list_bl, get_store_bl, update_store_bl, suspend_activate_store_bl, verify_stores_bl
 
 router = APIRouter()
 
@@ -14,60 +14,63 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-@router.post("/stores/", response_model=StoreDetails, status_code=status.HTTP_201_CREATED)
-def add_store(store: StoreDetailsCreate, db: Session = Depends(get_db)):
+@router.post("/stores/create/", response_model=StoreMessage, status_code=status.HTTP_201_CREATED)
+def create_store_endpoint(store: StoreDetailsCreate, db: Session = Depends(get_db)):
+    """
+    Store Onboard Endpoint 
+    """
     try:
-        db_store = create_store_record(store, db)
-        return db_store
+        store_data = create_store_bl(store, db)
+        return store_data
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+        logger.error(f"Database error in onboarding store: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error in onboarding store: " + str(e))
 
-@router.get("/stores/", status_code=status.HTTP_200_OK)
-def list_stores(db: Session = Depends(get_db)):
+@router.get("/stores/list/", status_code=status.HTTP_200_OK)
+def list_store_endpoint(db: Session = Depends(get_db)):
     try:
-        stores = get_list_stores(db)
-        return stores
+        stores_list = get_stores_list_bl(db)
+        return stores_list
     except Exception as e:
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+        logger.error(f"Database error in list stores: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error in list stores: " + str(e))
 
-@router.get("/stores/{mobile}", status_code=status.HTTP_200_OK)
-def get_store(mobile: str, db: Session = Depends(get_db)):
+@router.get("/stores/{mobile}/", status_code=status.HTTP_200_OK)
+def get_store_endpoint(mobile: str, db: Session = Depends(get_db)):
     try:
-        store = get_store_record(mobile, db)
-        return store
+        individual_store = get_store_bl(mobile, db)
+        return individual_store
     except Exception as e:
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+        logger.error(f"Database error in getting individual store: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error in getting individual store: " + str(e))
 
-@router.put("/stores/update/", response_model=UpdateStoreMobile, status_code=status.HTTP_200_OK)
-def update_store(store: UpdateStoreMobile, db: Session = Depends(get_db)):
+@router.put("/stores/update/", response_model=StoreMessage, status_code=status.HTTP_200_OK)
+def update_store_endpoint(store: UpdateStoreMobile, db: Session = Depends(get_db)):
     try:
-        db_store = update_store_record(store, db)
-        return db_store
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
-
-@router.put("/stores/verify/", response_model=StoreVerification, status_code=status.HTTP_200_OK)
-def verify_store(verify:StoreVerification, db: Session = Depends(get_db)):
-    try:
-        db_store = verify_stores(mobile=verify.mobile, verification=verify.verification, db=db)
-        return db_store
+        update_store = update_store_bl(store, db)
+        return update_store
     except Exception as e:
         db.rollback()
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+        logger.error(f"Database error in updating store: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error in updating store: " + str(e))
+
+@router.put("/stores/verify/", response_model=StoreMessage, status_code=status.HTTP_200_OK)
+def verify_store_endpoint(verify:StoreVerification, db: Session = Depends(get_db)):
+    try:
+        verify_store = verify_stores_bl(mobile=verify.mobile, verification=verify.verification, db=db)
+        return verify_store
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Database error in verifying store: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error in verifying store: " + str(e))
    
-@router.put("/stores/", response_model=StoreSuspendActivate, status_code=status.HTTP_200_OK)
-def suspend_activate(suspend:StoreSuspendActivate, db: Session = Depends(get_db)):
+@router.put("/stores/", response_model=StoreMessage, status_code=status.HTTP_200_OK)
+def suspend_or_activate_store_endpoint(suspend:StoreSuspendActivate, db: Session = Depends(get_db)):
     try:
-        db_store = suspend_activate_store(mobile=suspend.mobile, remarks_text=suspend.remarks, active_flag_store=suspend.active_flag, db=db)
-        return db_store
+        suspend_or_activate_store = suspend_activate_store_bl(mobile=suspend.mobile, remarks_text=suspend.remarks, active_flag_store=suspend.active_flag, db=db)
+        return suspend_or_activate_store
     except Exception as e:
         db.rollback()
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+        logger.error(f"Database error in suspend or activate store: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error in suspend or activate store: " + str(e))

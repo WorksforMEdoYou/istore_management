@@ -10,89 +10,78 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-def creating_category_record_db(db_category, db: Session):
+def creating_category_dal(creating_category_dal, db: Session):
     
     """
-    Creating category record
+    Creating category 
     """
     try:
-        db.add(db_category)
+        db.add(creating_category_dal)
         db.commit()
-        db.refresh(db_category)
-        return db_category
+        db.refresh(creating_category_dal)
+        return creating_category_dal
     except Exception as e:
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e)+ " while creating category record")
+        logger.error(f"Database error while creating the caregory: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error while creating the caregory: " + str(e)+ " while creating category record")
 
-def get_category_list_db(db:Session):
+def get_category_list_dal(db:Session):
     """
     Get list of all category
     """
     try:
-        categorys = db.query(CategoryModel).filter(CategoryModel.active_flag == 1).all()
-        category_list = []
-        for category in categorys:
-            category_data = {
-                "category_id": category.category_id,
-                "category_name": category.category_name,
-                "created_at": category.created_at,
-                "updated_at": category.updated_at,
-                "active_flag": category.active_flag
-            }
-            category_list.append(category_data)
-        return category_list
+        list_categorys = db.query(CategoryModel).filter(CategoryModel.active_flag == 1).all()
+        return list_categorys
     except Exception as e:
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+        logger.error(f"Database error while fetching list of category: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error while fetching list of category: " + str(e))
 
-def get_category_record_db(category_name: str, db: Session):
+def get_single_category_dal(category_name: str, db: Session):
     
     """
-    Get category record by category_id    
+    Get category by category_id    
     """
     try:
-        category = db.query(CategoryModel).filter(CategoryModel.category_name == category_name).first()
-        if category:
-            return category
+        single_category_data = db.query(CategoryModel).filter(CategoryModel.category_name == category_name).first()
+        if single_category_data:
+            return single_category_data
         else:
             raise HTTPException(status_code=404, detail="Category not found")
     except Exception as e:
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e)+ " while getting category record")
+        logger.error(f"Database error while fetching single category: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error while fetching single category: " + str(e)+ " while getting category record")
     
-def update_category_record_db(category_name: str, category: CategoryCreate, db: Session):
-    
+def update_category_dal(category_name: str, update_category: str, db: Session):
     """
-    Update category record by category_id
+    Update category by category_name
     """
     try:
-        db_category = db.query(CategoryModel).filter(CategoryModel.category_name == category_name).first()
-        if not db_category:
+        updating_category = db.query(CategoryModel).filter(CategoryModel.category_name == category_name).first()
+        if not updating_category:
             raise HTTPException(status_code=404, detail="Category not found")
-        db_category.category_name = category.category_name
-        db_category.updated_at = datetime.now()
+        updating_category.category_name = update_category
+        updating_category.updated_at = datetime.now()
         db.commit()
-        db.refresh(db_category)
-        return db_category
+        db.refresh(updating_category)
+        return updating_category
     except Exception as e:
         db.rollback()
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e)+ " while updating category record")
+        logger.error(f"Database error while updating the category: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error while updating the category: " + str(e) + " while updating category record")
 
-def activate_category_record_db(category_name, active_flag, db:Session):
+def activate_category_dal(category_name: str, active_flag: int, db: Session):
     """
     Updating the category active flag 0 or 1
     """
     try:
-        db_category = db.query(CategoryModel).filter(CategoryModel.category_name == category_name).first()
-        if not db_category:
+        activating_category = db.query(CategoryModel).filter(CategoryModel.category_name == category_name).first()
+        if not activating_category:
             raise HTTPException(status_code=404, detail="Category not found")
-        db_category.active_flag = active_flag
-        db_category.updated_at = datetime.now()
+        activating_category.active_flag = active_flag
+        activating_category.updated_at = datetime.now()
         db.commit()
-        db.refresh(db_category)
-        return db_category
+        db.refresh(activating_category)
+        return activating_category
     except Exception as e:
         db.rollback()
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+        logger.error(f"Database error while activating the category: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error while activating the category: " + str(e))

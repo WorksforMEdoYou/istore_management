@@ -19,7 +19,7 @@ class MedicineMasterBase(BaseModel):
 class MedicineMasterCreate(MedicineMasterBase):
     
     """
-    Pydantic model for creating a new medicine record.
+    Pydantic model for creating a new medicine .
     """
     pass
 
@@ -52,4 +52,10 @@ class UpdateMedicine(MedicineMasterBase):
     
     class Config:
         from_attributes = True
+        
+class MedicineMasterMessage(BaseModel):
+    """
+    Message for Medicine Master
+    """
+    message: str
     

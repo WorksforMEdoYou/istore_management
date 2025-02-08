@@ -11,3 +11,12 @@ class DeleteSale(BaseModel):
     
     class Config:
         from_attributes = True    
+        
+class SaleMessage(BaseModel):
+    """
+    Model for sale message
+    """
+    message: str = Field(..., description="Message to be sent to the user")
+    
+    class Config:
+        from_attributes = True

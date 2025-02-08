@@ -11,7 +11,7 @@ class DistributorBase(BaseModel):
 class DistributorCreate(DistributorBase):
     
     """
-    Pydantic model for creating a new distributor record.
+    Pydantic model for creating a new distributor .
     """
     pass
 
@@ -25,21 +25,27 @@ class Distributor(DistributorBase):
     class Config:
         from_attributes = True
         
-class UpdateDistributorRecord(DistributorBase):
+class UpdateDistributor(DistributorBase):
     """
-    Pydantic model for updating an existing distributor record.
+    Pydantic model for updating an existing distributor .
     """
-    update_distributor_name: str
+    update_distributor_name:str
     
     class Config:
         from_attributes = True
         
 class DistributorActivate(BaseModel):
     """
-    Pydantic model for activating a distributor record.
+    Pydantic model for activating a distributor .
     """
     distributor_name: str
     active_flag: int
     
     class Config:
         from_attributes = True
+        
+class DistributorMessage(BaseModel):
+    """
+    Base Mdoel for the store messages
+    """
+    message: str

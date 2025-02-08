@@ -62,7 +62,7 @@ class Sale(BaseModel):
     sale_date: datetime = Field(..., description="Sale Date")
     customer_id: str = Field(..., description="Customer OBjectId from the customer collection") 
     total_amount: float = Field(..., description="Total amount of the saled medicine")
-    invoice_id: str = Field(..., description="invoice ID of the bill")
+    #invoice_id: str = Field(..., description="invoice ID of the bill")
     sale_items: List[SaleItem] = Field(..., description="List of Saled medicines")
     class Config:
         arbitrary_types_allowed = True

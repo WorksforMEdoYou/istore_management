@@ -10,4 +10,13 @@ class DeletePurchase(BaseModel):
     purchase_id:str
     
     class Config:
-        from_attributes = True    
+        from_attributes = True 
+        
+class PurchaseMessage(BaseModel):
+    """
+    Message for Pricing
+    """
+    message: str = Field(..., description="Message for Pricing")
+    
+    class Config:
+        from_attributes = True

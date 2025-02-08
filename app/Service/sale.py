@@ -4,21 +4,22 @@ from typing import List
 from ..db.mongodb import get_database
 from ..models.store_mongodb_models import Sale
 import logging
-from ..crud.sales import create_sale_collection_db, get_sale_particular_db, read_sales_db, delete_sale_collection_db
+from ..crud.sales import create_sale_collection_dal, get_sale_particular_dal, get_sales_list_dal, delete_sale_collection_dal
 from datetime import datetime
 from sqlalchemy.orm import Session
 from ..utils import create_sale_invoice
+from ..schemas.Sale import SaleMessage
 
 # Configure logger
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-async def create_sale_collection(sale: Sale, db, mysql_db: Session):
+async def create_sale_collection_bl(new_sale_data_bl: Sale, db, mysql_db: Session):
     """
     Creating the sale collection in the database.
     """
     try:
-        sale_dict = sale.dict(by_alias=True)
+        sale_dict = new_sale_data_bl.dict(by_alias=True)
         
         store_id = sale_dict["store_id"]
         # Generate the invoice number
@@ -65,7 +66,7 @@ async def create_sale_collection(sale: Sale, db, mysql_db: Session):
                             quantity = 0
                             break
 
-        result = {
+        create_sale_datas = {
             "store_id": sale_dict["store_id"],
             "sale_date": str(sale_dict["sale_date"]),
             "customer_id": str(sale_dict["customer_id"]),
@@ -76,41 +77,41 @@ async def create_sale_collection(sale: Sale, db, mysql_db: Session):
             "active_flag": 1,
             "sale_items": sale_dict["sale_items"]
         }
-        sales_result = await create_sale_collection_db(sale=result, db=db)
-        return sales_result
+        created_sale = await create_sale_collection_dal(create_sale_datas, db)
+        return SaleMessage(message="Sale Created Successfully") #created_sale
     except Exception as e:
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+        logger.error(f"Database error in creating sale BL: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error in creating sale BL: " + str(e))
 
-async def get_sales(store_id:int, db):
+async def get_sales_bl(store_id:int, db):
     """
     Get the sale by store
     """
     try:
-        sales = await read_sales_db(store_id=store_id, db=db)
-        return sales
+        sales_list = await get_sales_list_dal(store_id=store_id, db=db)
+        return sales_list
     except Exception as e:
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+        logger.error(f"Database error in fetching the sales list BL: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error in fetching the sales list BL: " + str(e))
 
-async def get_sale_particular(sale_id: str, db):
+async def get_sale_particular_bl(sale_id: str, db):
     """
     Get the sale particular
     """
     try:
-        sale = await get_sale_particular_db(sale_id=sale_id, db=db)
-        return sale
+        individual_sale = await get_sale_particular_dal(sale_id=sale_id, db=db)
+        return individual_sale
     except Exception as e:
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+        logger.error(f"Database error in fetching the particular sale BL: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error in fetching the particular sale BL: " + str(e))
 
-async def delete_sale_collection(sale_id: str, db):
+async def delete_sale_collection_bl(sale_id: str, db):
     """
     Deleting the sale collection from the database.
     """
     try:
-        delete_result = await delete_sale_collection_db(sale_id=sale_id, db=db)
-        return delete_result
+        deleted_sale = await delete_sale_collection_dal(sale_id=sale_id, db=db)
+        return SaleMessage(message="Sale deleted Successfully") #deleted_sale
     except Exception as e:
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+        logger.error(f"Database error in delete sale BL: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error in delete sale BL: " + str(e))

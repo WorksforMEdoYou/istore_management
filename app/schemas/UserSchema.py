@@ -24,7 +24,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     
     """
-    Pydantic model for creating a new user record.
+    Pydantic model for creating a new user .
     """
     pass
 

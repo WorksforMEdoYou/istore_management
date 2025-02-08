@@ -10,3 +10,11 @@ class DeleteOrder(BaseModel):
     order_id: str = Field(..., title="Order ID", description="ID of the order")
     class Config:
         from_attributes = True
+        
+class OrderMessage(BaseModel):
+    """
+    message for Order
+    """
+    message: str = Field(..., title="Message", description="Message for Order")
+    class Config:
+        from_attributes = True

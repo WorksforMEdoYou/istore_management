@@ -15,21 +15,23 @@ from .models.store_mysql_models import InvoiceLookup
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-def check_name_available(name:str, model, field:str, db:Session):
+# Check whether entity is available
+def check_name_available_utils(name:str, table, field:str, db:Session):
     """
-    Checking the field available in the model
+    Checking the field available in the table
     """
     try:
-        name = db.query(model).filter(getattr(model, field) == name).first()
-        if name:
-            return name
+        entity = db.query(table).filter(getattr(table, field) == name).first()
+        if entity:
+            return entity
         else:
             return "unique"
     except SQLAlchemyError as e:
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
 
-def store_validation(store: StoreDetailsCreate, db: Session):
+# Check whether the store exists
+def check_store_exists_utils(store: StoreDetailsCreate, db: Session):
     """
     Store validation by email or mobile
     """
@@ -48,7 +50,7 @@ def store_validation(store: StoreDetailsCreate, db: Session):
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
     
 # cheacking wether the store is allready present in the database
-def store_validation_mobile(mobile:str, db: Session = get_db):
+def store_validation_mobile_utils(mobile:str, db: Session = get_db):
     """
     Store validation by mobile number
     """
@@ -65,42 +67,42 @@ def store_validation_mobile(mobile:str, db: Session = get_db):
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
 
 #check id validation
-def validate_by_id(id:int, model, field:str, db:Session):
+def validate_by_id_utils(id:int, table, field:str, db:Session):
     """
     validation by the id to compare the mysql with mongodb
     """
     try:
-        result = db.query(model).filter(getattr(model, field) == id).first()
-        if result:
-            return result
+        entity_data = db.query(table).filter(getattr(table, field) == id).first()
+        if entity_data:
+            return entity_data
         else:
             return "unique"
     except SQLAlchemyError as e:
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
 
-def get_name_by_id(id:int, model, field:str, name_field:str, db:Session):
+def get_name_by_id_utils(id:int, table, field:str, name_field:str, db:Session):
     """
     Get the name by the id
     """
     try:
-        result = db.query(model).filter(getattr(model, field) == id).first()
-        if result:
-            return getattr(result, name_field)
+        entity_name = db.query(table).filter(getattr(table, field) == id).first()
+        if entity_name:
+            return getattr(entity_name, name_field)
         else:
             return "unique"
     except SQLAlchemyError as e:
         logger.error(f"Database error: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
 
-def check_id_available_mongodb(id:str, model:str, db):
+def check_id_available_mongodb_utils(id:str, table:str, db):
     """
     checking the recored available in mongodb
     """
     try:
-        result = db[model].find_one({"_id": ObjectId(str(id))})
-        if result:
-            return result
+        mongo_entity = db[table].find_one({"_id": ObjectId(str(id))})
+        if mongo_entity:
+            return mongo_entity
         else:
             return "unique"
     except Exception as e:

@@ -33,7 +33,7 @@ class StoreDetailsBase(BaseModel):
 class StoreDetailsCreate(StoreDetailsBase):
     
     """
-    Pydantic model for creating a new store details record.
+    Pydantic model for creating a new store details .
     """
     pass
 
@@ -63,17 +63,17 @@ class UpdateStoreMobile(StoreDetailsBase):
     """
     Pydantic model for updating a store's mobile number.
     """
-    update_mobile: str
-    
-    class Config:
-        from_attributes = True
+    pass
         
-class StoreVerification(UpdateStoreMobile):
+class StoreVerification(BaseModel):
     """
     Pydantic model for store verification.
     """
+    mobile: str
     verification: str
-    
-    class Config:
-        from_attributes = True
-         
+
+class StoreMessage(BaseModel):
+    """
+    Base Mdoel for the store messages
+    """
+    message: str

@@ -11,3 +11,11 @@ class DeleteStock(BaseModel):
     medicine_id: int = Field(..., description="medicine id for soft delete")
     class Config:
         from_attributes = True 
+        
+class StockMessage(BaseModel):
+    """
+    Stock message model
+    """
+    message: str = Field(..., description="message for stock")
+    class Config:
+        from_attributes = True

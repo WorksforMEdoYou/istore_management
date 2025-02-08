@@ -11,90 +11,81 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-def create_manufacturer_record_db(db_manufacturer, db: Session = get_db):
+def create_manufacturer_dal(new_manufacturer_data, db: Session = get_db):
     """
-    Creating manufacturer record
+    Creating manufacturer in Database 
     """
     try:
-        db.add(db_manufacturer)
+        db.add(new_manufacturer_data)
         db.commit()
-        db.refresh(db_manufacturer)
-        return db_manufacturer
+        db.refresh(new_manufacturer_data)
+        return new_manufacturer_data
     except Exception as e:
-        logger.error(f"Error creating manufacturer record: {e}")
+        logger.error(f"Database error while creating manufacturer  DAL: {e}")
         db.rollback()
-        raise HTTPException(status_code=500, detail="Error creating manufacturer record: " + str(e))
+        raise HTTPException(status_code=500, detail="Database error while creating manufacturer  DAL: " + str(e))
 
-def get_manufacturer_list_db(db: Session):
+def get_manufacturer_list_dal(db: Session):
     """
     Get list of all manufacturers
     """
     try:
-        manufacturers = db.query(ManufacturerModel).filter(ManufacturerModel.active_flag == 1).all()
-        manufacturer_list = []
-        for manufacturer in manufacturers:
-            manufacturer_data = {
-                "manufacturer_id": manufacturer.manufacturer_id,
-                "manufacturer_name": manufacturer.manufacturer_name,
-                "created_at": manufacturer.created_at,
-                "updated_at": manufacturer.updated_at,
-                "active_flag": manufacturer.active_flag
-            }
-            manufacturer_list.append(manufacturer_data)
-        return manufacturer_list
+        manufacturers_list = db.query(ManufacturerModel).filter(ManufacturerModel.active_flag == 1).all()
+        if manufacturers_list:
+            return manufacturers_list
     except Exception as e:
-        logger.error(f"Error getting manufacturer list: {e}")
-        raise HTTPException(status_code=500, detail="Error getting manufacturer list: " + str(e))
+        logger.error(f"Database error while getting manufacturer list DAL: {e}")
+        raise HTTPException(status_code=500, detail="Database error while getting manufacturer list DAL: " + str(e))
 
-def get_manufacturer_record_db(manufacturer_name: str, db: Session):
+def get_manufacturer_dal(manufacturer_name: str, db: Session):
     
     """
-    Get manufacturer record by manufacturer_id
+    Get manufacturer by manufacturer_name
     """
     try:
-        manufacturer = db.query(ManufacturerModel).filter(ManufacturerModel.manufacturer_name == manufacturer_name).first()
-        if manufacturer:
-            return manufacturer
+        individual_manufacturer = db.query(ManufacturerModel).filter(ManufacturerModel.manufacturer_name == manufacturer_name).first()
+        if individual_manufacturer:
+            return individual_manufacturer
         else:
             raise HTTPException(status_code=404, detail="Manufacturer not found")
     except Exception as e:
-        logger.error(f"Error getting manufacturer record: {e}")
-        raise HTTPException(status_code=500, detail="Error getting manufacturer record: " + str(e))
+        logger.error(f"Database error when getting individual manufacturer  DAL: {e}")
+        raise HTTPException(status_code=500, detail="Database error when getting individual manufacturer  DAL: " + str(e))
 
-def update_manufacturer_record_db(manufacturer_name: str, manufacturer: UpdateManufacturer, db: Session):
+def update_manufacturer_dal(manufacturer_name: str, manufacturer: UpdateManufacturer, db: Session):
     """
-    Update manufacturer record by manufacturer_name
+    Update manufacturer by manufacturer_name
     """
     try:
-        db_manufacturer = db.query(ManufacturerModel).filter(ManufacturerModel.manufacturer_name == manufacturer_name).first()
-        if not db_manufacturer:
+        update_manufacturer = db.query(ManufacturerModel).filter(ManufacturerModel.manufacturer_name == manufacturer_name).first()
+        if not update_manufacturer:
             raise HTTPException(status_code=404, detail="Manufacturer not found")
-        db_manufacturer.manufacturer_name = manufacturer.manufacturer_name
-        db_manufacturer.updated_at = datetime.now()
+        update_manufacturer.manufacturer_name = manufacturer.manufacturer_update_name
+        update_manufacturer.updated_at = datetime.now()
         db.commit()
-        db.refresh(db_manufacturer)
-        return db_manufacturer
+        db.refresh(update_manufacturer)
+        return update_manufacturer
     except Exception as e:
         db.rollback()
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Database error: " + str(e))
+        logger.error(f"Database error when updating the manufacturer: {str(e)}")
+        raise HTTPException(status_code=500, detail="Database error when updating the manufacturer: " + str(e))
     
-def activate_manufacturer_record_db(manufacturer_name, active_flag, db:Session):
+def activate_manufacturer_dal(manufacturer_name, active_flag, db:Session):
     """
     Updating the Manufacturers active flag 0 or 1
     """
     try:
-        db_manufacturer = db.query(ManufacturerModel).filter(ManufacturerModel.manufacturer_name == manufacturer_name).first()
-        if not db_manufacturer:
+        active_inactive_manufacturer = db.query(ManufacturerModel).filter(ManufacturerModel.manufacturer_name == manufacturer_name).first()
+        if not active_inactive_manufacturer:
             raise HTTPException(status_code=404, detail="Manufacturer not found")
-        db_manufacturer.active_flag = active_flag
-        db_manufacturer.updated_at = datetime.now()
+        active_inactive_manufacturer.active_flag = active_flag
+        active_inactive_manufacturer.updated_at = datetime.now()
         db.commit()
-        db.refresh(db_manufacturer)
-        return db_manufacturer
+        db.refresh(active_inactive_manufacturer)
+        return active_inactive_manufacturer
     except Exception as e:
-        logger.error(f"Error updating manufacturer record: {e}")
+        logger.error(f"Database error while updating manufacturer : {e}")
         db.rollback()
-        raise HTTPException(status_code=500, detail="Error updating manufacturer record: " + str(e))
+        raise HTTPException(status_code=500, detail="Database error while updating manufacturer : " + str(e))
         
                    

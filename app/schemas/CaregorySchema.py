@@ -11,7 +11,7 @@ class CategoryBase(BaseModel):
 class CategoryCreate(CategoryBase):
     
     """
-    Pydantic model for creating a new category record.
+    Pydantic model for creating a new category .
     """
     pass
 
@@ -22,5 +22,32 @@ class Category(CategoryBase):
     """
     category_id: Optional[int]
 
+    class Config:
+        from_attributes = True
+        
+class UpdatingCategory(BaseModel):
+    """
+    Updating the category
+    """
+    category_name: str
+    update_category_name: str
+
+        
+class CategoryMessage(BaseModel):
+    """
+    Pydantic model for the caregory message
+    """
+    message: str
+    
+    class config:
+        from_attributes = True
+
+class ActivateCategory(BaseModel):
+    """
+    Activate the category
+    """
+    category_name: str
+    active_flag: int
+    
     class Config:
         from_attributes = True
