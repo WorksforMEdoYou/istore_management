@@ -28,10 +28,11 @@ def create_store_dal(new_store_data_dal , db: Session = get_db):
 
 def get_list_stores_dal(db: Session = get_db):
     """
-    Get store List active_flag==1
+    Get store List
     """
     try:
-        stores_list_dal = db.query(StoreDetailsModel).filter(StoreDetailsModel.active_flag == 1).all()
+        #stores_list_dal = db.query(StoreDetailsModel).filter(StoreDetailsModel.active_flag == 1).all()
+        stores_list_dal = db.query(StoreDetailsModel).all()
         return stores_list_dal
     except SQLAlchemyError as e:
         logger.error(f"Database error while fetching the stores list DAL: {str(e)}")
@@ -49,7 +50,8 @@ def get_store_dal(mobile: str, db: Session = get_db):
         logger.error(f"Database error while fetching the store using mobile number DAL: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error: " + str(e))
     
-def suspend_activate_store_dal(mobile: str, remarks_text: str, active_flag_store: int, db: Session = Depends(get_db)):
+#def suspend_activate_store_dal(mobile: str, remarks_text: str, active_flag_store: int, db: Session = Depends(get_db)):
+def suspend_activate_store_dal(mobile: str, remarks_text: str, db: Session = Depends(get_db)):
     """
     Suspend or Activate Store by mobile number
     """
@@ -57,7 +59,8 @@ def suspend_activate_store_dal(mobile: str, remarks_text: str, active_flag_store
         store = db.query(StoreDetailsModel).filter(StoreDetailsModel.mobile == mobile).first()
         if store:
             store.remarks = remarks_text
-            store.active_flag = active_flag_store
+            #store.active_flag = active_flag_store
+            store.active_flag = 2 # 2 suspend
             store.updated_at = datetime.now()
             db.commit()
             db.refresh(store)

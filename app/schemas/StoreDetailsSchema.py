@@ -28,7 +28,7 @@ class StoreDetailsBase(BaseModel):
     is_main_store: bool
     latitude: float
     longitude: float
-    status: StoreStatus  # the store status can be active, inactive or closed
+    #status: StoreStatus  # the store status can be active, inactive or closed
 
 class StoreDetailsCreate(StoreDetailsBase):
     
@@ -54,7 +54,7 @@ class StoreSuspendActivate(BaseModel):
     """
     mobile: str
     remarks: str
-    active_flag: int
+    #active_flag: int
     
     class Config:
         from_attributes = True

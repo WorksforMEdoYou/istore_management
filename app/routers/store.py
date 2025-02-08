@@ -68,7 +68,8 @@ def verify_store_endpoint(verify:StoreVerification, db: Session = Depends(get_db
 @router.put("/stores/", response_model=StoreMessage, status_code=status.HTTP_200_OK)
 def suspend_or_activate_store_endpoint(suspend:StoreSuspendActivate, db: Session = Depends(get_db)):
     try:
-        suspend_or_activate_store = suspend_activate_store_bl(mobile=suspend.mobile, remarks_text=suspend.remarks, active_flag_store=suspend.active_flag, db=db)
+        #suspend_or_activate_store = suspend_activate_store_bl(mobile=suspend.mobile, remarks_text=suspend.remarks, active_flag_store=suspend.active_flag, db=db)
+        suspend_or_activate_store = suspend_activate_store_bl(mobile=suspend.mobile, remarks_text=suspend.remarks, db=db)
         return suspend_or_activate_store
     except Exception as e:
         db.rollback()

@@ -23,7 +23,7 @@ class StoreDetails(Base):
     is_main_store = Column(Boolean, doc="Is Main of the stores")
     latitude = Column(DECIMAL(10, 6), doc="Latitude of the store")
     longitude = Column(DECIMAL(10, 6), doc="Longitude of the store")
-    status = Column(Enum(StoreStatus), doc="Status of the store Active, InActive, Closed")
+    #status = Column(Enum(StoreStatus), doc="Status of the store Active, InActive, Closed")
     # new fileds added
     remarks = Column(Text, doc="Remarks for the store")
     verification_status = Column(Enum(StoreVerification), doc="Store verification can be pending, verified")

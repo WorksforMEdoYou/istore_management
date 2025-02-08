@@ -36,7 +36,7 @@ def create_store_bl(store: StoreDetailsCreate, db: Session = get_db):
             is_main_store = store.is_main_store,
             latitude = store.latitude,
             longitude = store.longitude,
-            status = store.status,
+            #status = store.status,
             remarks = "",
             verification_status = "pending",
             active_flag = 0,
@@ -96,7 +96,8 @@ def get_store_bl(mobile: str, db: Session = get_db):
         logger.error(f"Database error in fetching the store by mobile BL: {str(e)}")
         raise HTTPException(status_code=500, detail="Database error in fetching the store by mobile BL: " + str(e))
     
-def suspend_activate_store_bl(mobile: str, remarks_text: str, active_flag_store: int, db: Session = Depends(get_db)):
+#def suspend_activate_store_bl(mobile: str, remarks_text: str, active_flag_store: int, db: Session = Depends(get_db)):
+def suspend_activate_store_bl(mobile: str, remarks_text: str, db: Session = Depends(get_db)):
     """
     Suspend or Activate Store by mobile BL making active_status = 2
     """
@@ -105,9 +106,10 @@ def suspend_activate_store_bl(mobile: str, remarks_text: str, active_flag_store:
         if store_valid == "unique":
             raise HTTPException(status_code=400, detail="Store not found")
         # this will hold the data from the suspended or activated store
-        store_suspend_acivate = suspend_activate_store_dal(mobile, remarks_text, active_flag_store, db)
-        if active_flag_store == 1:
-            return StoreMessage(message="Store activated successfully")
+        #store_suspend_acivate = suspend_activate_store_dal(mobile, remarks_text, active_flag_store, db)
+        store_suspend_acivate = suspend_activate_store_dal(mobile, remarks_text, db)
+        #if active_flag_store == 1:
+            #return StoreMessage(message="Store activated successfully")
         return StoreMessage(message="Store suspended successfully")#store_suspend_acivate
     except SQLAlchemyError as e:
         db.rollback()
